@@ -1,0 +1,453 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lock-in-Lock Finance App</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        :root {
+            --primary-color: #023020;
+            --secondary-color: #f5f5dc;
+            --success-color: #f5f5dc;
+            --background-light: #f5f5dc;
+        }
+        body { 
+            font-family: 'Arial', sans-serif; 
+            margin: 0; 
+            padding: 0; 
+            background-color: var(--background-light); 
+            line-height: 1.6;
+            color: #333;
+        }
+        .container { 
+            max-width: 100%; 
+            margin: auto; 
+            background: #fff8e7; 
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+        .nav {
+            display: flex;
+            justify-content: space-around;
+            background-color: #f8f9fa;
+            padding: 10px 0;
+            border-top: 1px solid #e0e0e0;
+        }
+        .nav-item {
+            text-align: center;
+            cursor: pointer;
+            padding: 10px;
+            flex-grow: 1;
+        }
+        .nav-item.active {
+            color: var(--primary-color);
+            border-bottom: 2px solid var(--primary-color);
+        }
+        .section {
+            display: none;
+            padding: 20px;
+        }
+        .section.active {
+            display: block;
+        }
+        .dashboard { 
+            background: linear-gradient(135deg, var(--primary-color), #0056b3); 
+            color: white; 
+            padding: 20px; 
+            text-align: center;
+        }
+        .feature { 
+            background: #f8f9fa; 
+            border-left: 4px solid var(--primary-color); 
+            padding: 15px; 
+            margin-bottom: 15px; 
+        }
+        .button { 
+            display: block; 
+            width: 100%; 
+            padding: 12px; 
+            background: var(--success-color); 
+            color: white; 
+            text-align: center; 
+            border: none; 
+            border-radius: 5px; 
+            margin-top: 15px; 
+            cursor: pointer;
+            transition: background 0.3s ease;
+        }
+        .button:hover {
+            background: #218838;
+        }
+        .input-group {
+            margin-bottom: 15px;
+        }
+        .input-group label {
+            display: block;
+            margin-bottom: 5px;
+            color: #333;
+        }
+        .input-group input, 
+        .input-group select {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+        .dream-categories {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+        .dream-category {
+            border: 1px solid #ddd;
+            padding: 10px;
+            text-align: center;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        .dream-category:hover {
+            background-color: #e9ecef;
+            border-color: var(--primary-color);
+        }
+        .dream-category.selected {
+            background-color: var(--primary-color);
+            color: white;
+            border-color: #2980b9;
+        }
+        .result-card {
+            background-color: #f8f9fa;
+            border-left: 4px solid var(--primary-color);
+            padding: 20px;
+            margin-top: 20px;
+            border-radius: 5px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Dashboard -->
+        <div class="dashboard">
+            <h2>Lock-in-Lock</h2>
+            <p>Your Financial Companion</p>
+        </div>
+
+        <!-- Navigation -->
+        <div class="nav">
+            <div class="nav-item active" data-section="budget">Budget</div>
+            <div class="nav-item" data-section="dream">Dream Goals</div>
+            <div class="nav-item" data-section="articles">Insights</div>
+        </div>
+
+        <!-- Budget Section (Previous Budget Section Remains the Same) -->
+        <div id="budget" class="section active">
+            <div class="feature"> 
+                <h3>Expense Tracking</h3>
+                <div class="input-group">
+                    <label for="userName">Your Name:</label>
+                    <input type="text" id="userName" placeholder="Enter your name">
+                    
+                    <label for="monthlyIncome">Monthly Income:</label>
+                    <input type="number" id="monthlyIncome" placeholder="Enter your monthly income">
+                    
+                    <label for="expenseAmount">Add Expense:</label>
+                    <input type="number" id="expenseAmount" placeholder="Enter expense amount">
+                    
+                    <label for="expenseCategory">Category:</label>
+                    <select id="expenseCategory">
+                        <option>Basic Needs</option>
+                        <option>Leisure and Entertainment</option>
+                        <option>Health Care</option>
+                        <option>Education</option>
+                        <option>Insurance</option>
+                        <option>House/Car Loans</option>
+                        <option>Other</option>
+                    </select>
+                    <button class="button" onclick="addExpense()">Record Expense</button>
+                </div>
+                <div id="expenseList"></div>
+            </div>
+
+            <div class="feature">
+                <h3>Budget Overview</h3>
+                <p>Welcome, <span id="userNameDisplay">Guest</span>!</p>
+                <p>Total Monthly Budget: $<span id="totalBudget">0</span></p>
+                <p>Remaining Budget: $<span id="remainingBudget">0</span></p>
+                <div id="budgetAllocation"></div>
+            </div>
+        </div>
+
+        <!-- Dream Goals Section -->
+        <div id="dream" class="section">
+            <h3>Dream-to-Realization</h3>
+            <div class="input-group">
+                <label>Select Your Dream Categories (Multiple Selection)</label>
+                <div class="dream-categories">
+                    <div class="dream-category" data-category="travel">
+                        <i class="fas fa-plane"></i>
+                        <p>Travel</p>
+                    </div>
+                    <div class="dream-category" data-category="education">
+                        <i class="fas fa-graduation-cap"></i>
+                        <p>Education</p>
+                    </div>
+                    <div class="dream-category" data-category="startup">
+                        <i class="fas fa-lightbulb"></i>
+                        <p>Startup</p>
+                    </div>
+                    <div class="dream-category" data-category="homeOwnership">
+                        <i class="fas fa-home"></i>
+                        <p>Home</p>
+                    </div>
+                    <div class="dream-category" data-category="careerDevelopment">
+                        <i class="fas fa-briefcase"></i>
+                        <p>Career Dev</p>
+                    </div>
+                    <div class="dream-category" data-category="other">
+                        <i class="fas fa-star"></i>
+                        <p>Other</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="input-group">
+                <label for="monthlyIncome">Monthly Income ($)</label>
+                <input type="number" id="monthlyIncomeGoal" placeholder="Enter your monthly income">
+            </div>
+
+            <div class="input-group">
+                <label for="monthlyExpenses">Monthly Expenses ($)</label>
+                <input type="number" id="monthlyExpensesGoal" placeholder="Enter your monthly expenses">
+            </div>
+
+            <div class="input-group">
+                <label for="dreamGoal">Dream Goal Amount ($)</label>
+                <input type="number" id="dreamGoal" placeholder="Enter your financial goal">
+            </div>
+
+            <div class="input-group">
+                <label for="timeframe">Desired Timeframe (Years)</label>
+                <select id="timeframe">
+                    <option value="1">1 Year</option>
+                    <option value="2">2 Years</option>
+                    <option value="3">3 Years</option>
+                    <option value="5">5 Years</option>
+                    <option value="10">10 Years</option>
+                </select>
+            </div>
+
+            <button class="button" onclick="calculateDream()">Project My Dream</button>
+
+            <div id="resultSection" class="result-card" style="display:none;">
+                <h3>Your Dream Projection</h3>
+                <p id="monthlyContribution"></p>
+                <p id="totalSavingPotential"></p>
+                <p id="timeToGoal"></p>
+            </div>
+
+            <div id="savingsTips" style="display:none;">
+                <h3>💡 Smart Savings Tips</h3>
+                <p id="dynamicTips"></p>
+            </div>
+        </div>
+
+        <!-- Articles Section -->
+        <div id="articles" class="section">
+            <div class="feature">
+                <h3>Financial Articles</h3>
+                <div>
+                    <p><a href="#" onclick="toggleArticle('article1')">Budgeting Like a Boss—Why Early Habits Pay Off Big Time</a></p>
+                    <div id="article1" style="display:none; padding:10px; background:#f4f4f4; border-radius:5px;">
+                        Picture this—you’ve just been paid, and your bank account is feeling full. The temptation to splurge is real, but wait… pause for just a second! Building strong budgeting and spending habits now is like planting seeds for your financial future. Create a simple budget where you divide your money into needs, wants, and savings. Apps like Lock-in-Lock make this easier than math class. Why? Because having control over your money now means avoiding bad debts later—those pesky credit cards and loans that creep up when you’re not looking. Trust us, budgeting is one life skill that’ll never go out of style.
+                    </div>
+
+                    <p><a href="#" onclick="toggleArticle('article2')">Work-Life Balance Starts with Spending Smart</a></p>
+                    <div id="article2" style="display:none; padding:10px; background:#f4f4f4; border-radius:5px;">
+                        You’ve heard it a hundred times—work hard, play hard. But what they don’t tell you is that balancing your budget is critical to balancing your work and personal life. Smart spending doesn’t mean you have to skip your favorite coffee or Friday night fun. It’s about deciding what truly matters to you. Maybe cut back on things you barely use (goodbye, forgotten subscriptions!) and put that money toward experiences or moments that bring joy. Managing your expenses thoughtfully helps you stress less about money and actually enjoy life. Plus, keeping your spending in check keeps you from turning to credit cards that lead to sticky debt situations.
+                    </div>
+
+                    <p><a href="#" onclick="toggleArticle('article3')">Financial Goals Are Your New Productivity Hack</a></p>
+                    <div id="article3" style="display:none; padding:10px; background:#f4f4f4; border-radius:5px;">
+                        Goals aren’t just for work or fitness challenges—they’re for your finances too! Whether it’s saving for a dream vacation or building an emergency fund, realistic financial goals keep you productive and on track. Start small; maybe it’s saving IDR 300,000 a month or paying off a chunk of that spending loan. Every little win builds confidence. Remember, setting goals helps you avoid overspending that can spiral into debt. The clearer you are about your financial priorities, the faster you can chase your dream life—with less guilt and more freedom.
+                    </div>
+
+                    <p><a href="#" onclick="toggleArticle('article4')">Bad Debts Are the Villains of Your Wallet</a></p>
+                    <div id="article4" style="display:none; padding:10px; background:#f4f4f4; border-radius:5px;">
+                        We get it—credit cards are way too convenient, and it’s easy to ignore that “minimum due” trap. But bad debts are sneaky—they grow while you’re not paying attention. The trick to keeping them at bay? Only borrow what you can repay quickly. Better yet, think twice about whether you need to use credit at all. Emergency fund running low? Time to boost it with savings. Want to shop? Stick to your budget. Learning to say no (even to yourself) is key to staying out of the debt danger zone. Heroes manage money smartly, and villains? Well, they drown in debt.
+                    </div>
+
+                    <p><a href="#" onclick="toggleArticle('article5')">A Financial Foundation to Stand On</a></p>
+                    <div id="article5" style="display:none; padding:10px; background:#f4f4f4; border-radius:5px;">
+                        Building a strong financial foundation may not sound glamorous, but it’s so worth it. Start with basics like creating savings goals, tracking your expenses, and understanding where your money goes. Automate savings if you can—it’s like paying your future-self first. Avoid lifestyle inflation (you don’t need to upgrade just because you can!), and always, ALWAYS have an emergency fund. A foundation built on healthy money habits keeps you from falling into debt traps and helps you focus on what truly matters—like achieving your dreams without financial worries holding you back.
+                    </div>
+
+                    <p><a href="#" onclick="toggleArticle('article6')">Your Wallet’s New Best Friend— Lock-in-Lock App Tracks It All</a></p>
+                    <div id="article6" style="display:none; padding:10px; background:#f4f4f4; border-radius:5px;">
+                        Managing your money just got cooler (and way easier). Say hello to the Lock-in-Lock Financial App, your new BFF for tracking spending like a pro. Imagine knowing exactly where your cash goes—Netflix binge subscription? Late-night snacks? Yep, it's all there on the app’s dashboard. With charts and insights, it helps you spot spending patterns, so you never have to wonder why your account feels empty. By keeping an eye on your habits, you’ll have more control and avoid overspending that could lead to dreaded debt. Goodbye, money mysteries. Hello, smarter decisions!
+                    </div>
+
+                    <p><a href="#" onclick="toggleArticle('article7')">Never Forget a Payment Again— Lock-in-Lock Got Your Back</a></p>
+                    <div id="article7" style="display:none; padding:10px; background:#f4f4f4; border-radius:5px;">
+                        We’ve all been there—you forgot to pay a bill and now you’re hit with late fees. Ouch! Fear not, the Lock-in-Lock Financial App is here to save your day (and your wallet). With its nifty alert system, the app sends you reminders for due payments. Whether it’s phone bills, or credit card dues, you’ll always be on top of it. No more unnecessary interest fees on your credit card. It’s like having a personal assistant who keeps you stress-free and in the clear. Time to kiss those avoidable fees goodbye!
+                    </div>
+
+                    <p><a href="#" onclick="toggleArticle('article8')">Live Your Best Life with Financial Health Check-Ups</a></p>
+                    <div id="article8" style="display:none; padding:10px; background:#f4f4f4; border-radius:5px;">
+                        The Lock-in-Lock Financial App makes it simple to check how you’re doing financially. With just a few taps, you can see your savings progress, track debts, and get a handle on your overall money vibes. It’s super empowering to know where you stand and how to improve. Plus, staying on top of your financial health means you can plan for epic milestones—whether it’s a trip abroad or a down payment on your dream car. Get ready to live your best (and stress-free) life!
+                    </div>
+
+                    <p><a href="#" onclick="toggleArticle('article9')">Managing Personal Health</a></p>
+                    <div id="article9" style="display:none; padding:10px; background:#f4f4f4; border-radius:5px;">
+                        Did you know that when dealing with personal struggles of being faced with challenging issues in life could trigger a response from cortisol? Cortisol is our body’s main stress hormone and may be harmful to the immune system when unregulated. By lowering cortisol levels, you can keep up a healthy balanced lifestyle. Some of the ways to do so are by eating a whole-food plant based diet from the inclusivity of fiber (fruits and vegetables) as it helps regulate gut bacteria; regulating hormones in the process, getting adequate amounts of sleep and indulging in hobbies. Diet is really what helps you battle stress, as well as sleep amidst your demanding lifestyles. And you shouldn’t miss out on bringing peace to your mind even just for a little portion of your life by doing hobbies such as painting, as it could really benefit in the long-run and let you deal with problems head-on.
+                    </div>
+
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Navigation Logic
+        document.querySelectorAll('.nav-item').forEach(item => {
+            item.addEventListener('click', function() {
+                // Remove active from all nav items and sections
+                document.querySelectorAll('.nav-item').forEach(i => i.classList.remove('active'));
+                document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+
+                // Add active to clicked nav item and corresponding section
+                this.classList.add('active');
+                const sectionId = this.dataset.section;
+                document.getElementById(sectionId).classList.add('active');
+            });
+        });
+
+        let totalBudget = 0;
+        let expenses = [];
+
+        // Update budget tracking to be more personalized
+        function updateBudgetOverview() {
+            const userName = document.getElementById('userName').value;
+            const monthlyIncome = parseFloat(document.getElementById('monthlyIncome').value);
+
+            if (userName && monthlyIncome) {
+                // Personalized budget allocation
+                document.getElementById('userNameDisplay').textContent = userName;
+                
+                // Calculate budget based on income
+                totalBudget = monthlyIncome;
+                document.getElementById('totalBudget').textContent = totalBudget.toFixed(2);
+                document.getElementById('remainingBudget').textContent = totalBudget.toFixed(2);
+
+                // Suggested budget allocation
+                const budgetAllocation = document.getElementById('budgetAllocation');
+                budgetAllocation.innerHTML = `
+                    <h4>Recommended Budget Breakdown:</h4>
+                    <p>🏠 Basic Needs: $${(totalBudget * 0.5).toFixed(2)} (50%)</p>
+                    <p>💰 Savings: $${(totalBudget * 0.2).toFixed(2)} (20%)</p>
+                    <p>🎉 Leisure: $${(totalBudget * 0.15).toFixed(2)} (15%)</p>
+                    <p>🌟 Other Expenses: $${(totalBudget * 0.15).toFixed(2)} (15%)</p>
+                `;
+            }
+        }
+
+        // Modify existing addExpense function
+        function addExpense() {
+            const expenseAmount = parseFloat(document.getElementById('expenseAmount').value);
+            const expenseCategory = document.getElementById('expenseCategory').value;
+
+            if (isNaN(expenseAmount) || expenseAmount <= 0) {
+                alert('Please enter a valid expense amount');
+                return;
+            }
+
+            // Subtract expense from budget
+            totalBudget -= expenseAmount;
+            expenses.push({ amount: expenseAmount, category: expenseCategory });
+
+            // Update budget display
+            document.getElementById('remainingBudget').textContent = totalBudget.toFixed(2);
+
+            // Add expense to list
+            const expenseList = document.getElementById('expenseList');
+            const expenseItem = document.createElement('p');
+            expenseItem.textContent = `${expenseCategory}: $${expenseAmount.toFixed(2)}`;
+            expenseList.appendChild(expenseItem);
+
+            // Clear input
+            document.getElementById('expenseAmount').value = '';
+        }
+
+        // Dream Category Selection with Multiple Toggle
+        document.querySelectorAll('.dream-category').forEach(category => {
+            category.addEventListener('click', function() {
+                // Toggle the 'selected' class
+                this.classList.toggle('selected');
+            });
+        });
+
+        function calculateDream() {
+            // Get all selected categories
+            const selectedCategories = Array.from(
+                document.querySelectorAll('.dream-category.selected')
+            ).map(el => el.dataset.category);
+
+            const monthlyIncome = parseFloat(document.getElementById('monthlyIncomeGoal').value);
+            const monthlyExpenses = parseFloat(document.getElementById('monthlyExpensesGoal').value);
+            const dreamGoal = parseFloat(document.getElementById('dreamGoal').value);
+            const timeframe = parseFloat(document.getElementById('timeframe').value);
+
+            // Basic validation
+            if (!monthlyIncome || !monthlyExpenses || !dreamGoal || selectedCategories.length === 0) {
+                alert('Please fill in all fields and select at least one dream category');
+                return;
+            }
+
+            // Calculate disposable income
+            const disposableIncome = monthlyIncome - monthlyExpenses;
+            const monthlySavingsPossible = disposableIncome * 0.3; // Recommending 30% savings
+
+            // Time to goal calculation
+            const monthsToGoal = Math.ceil(dreamGoal / monthlySavingsPossible);
+            const yearsToGoal = monthsToGoal / 12;
+
+            // Display results
+            const resultSection = document.getElementById('resultSection');
+            const savingsTips = document.getElementById('savingsTips');
+            
+            document.getElementById('monthlyContribution').innerHTML = 
+                `💰 Recommended Monthly Savings: <strong>$${monthlySavingsPossible.toFixed(2)}</strong>`;
+            document.getElementById('totalSavingPotential').innerHTML = 
+                `📈 Total Savings Potential in ${timeframe} years: <strong>$${(monthlySavingsPossible * 12 * timeframe).toFixed(2)}</strong>`;
+            document.getElementById('timeToGoal').innerHTML = 
+                `⏳ Estimated Time to Reach Goal: <strong>${yearsToGoal.toFixed(2)} years</strong>`;
+
+            resultSection.style.display = 'block';
+            savingsTips.style.display = 'block';
+
+            // Dynamic tips based on selected categories
+            const tips = `
+                <p>📌 Plan your expenses and track them regularly.</p>
+                <p>📌 Allocate a specific amount for your dream goals every month.</p>
+                ${selectedCategories.includes('travel') ? '<p>🌍 Save on travel by booking in advance and looking for deals.</p>' : ''}
+                ${selectedCategories.includes('education') ? '<p>📚 Look for scholarships and part-time jobs to support your education.</p>' : ''}
+                ${selectedCategories.includes('startup') ? '<p>💡 Start small and reinvest your profits to grow your startup.</p>' : ''}
+                ${selectedCategories.includes('homeOwnership') ? '<p>🏠 Save for a down payment and look for affordable housing options.</p>' : ''}
+                ${selectedCategories.includes('careerDevelopment') ? '<p>📈 Invest in courses and certifications to advance your career.</p>' : ''}
+                ${selectedCategories.includes('other') ? '<p>⭐ Set clear goals and prioritize your spending to achieve other dreams.</p>' : ''}
+            `;
+            document.getElementById('dynamicTips').innerHTML = tips;
+        }
+
+        function toggleArticle(articleId) {
+            const article = document.getElementById(articleId);
+            if (article.style.display === 'none' || article.style.display === '') {
+                article.style.display = 'block';
+            } else {
+                article.style.display = 'none';
+            }
+        }
+    </script>
+</body>
+</html>
